@@ -1,0 +1,28 @@
+{
+  "name": "quizabled_ms",
+  "version": "1.0.0",
+  "description": "Quizabled MicroServices will be handled here",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arunkumarsubburaj/quizabled_ms.git"
+  },
+  "author": "Arun Kumar Subburaj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/arunkumarsubburaj/quizabled_ms/issues"
+  },
+  "homepage": "https://github.com/arunkumarsubburaj/quizabled_ms#readme",
+  "dependencies": {
+    "cookie-parser": "^1.4.5",
+    "express": "^4.17.1",
+    "express-session": "^1.17.2",
+    "mssql": "^7.2.1",
+    "multer": "^1.4.3",
+    "tedious": "^14.0.0"
+  }
+}
