@@ -1,5 +1,5 @@
 var sql = require("mssql");
-exports.getUsers = function (req, res) {
+getUsers = function (req, res) {
   // create Request object
   var request = new sql.Request();
   // query to the database and get the records
@@ -7,6 +7,12 @@ exports.getUsers = function (req, res) {
     if (err) console.log(err);
     // send records as a response
     users = recordset.recordset;
-    res.status(200).send("User Data Fetched Successfully");
+    res
+      .status(200)
+      .send({ data: users, message: "User Data Fetched Successfully" });
   });
+};
+
+exports.UserController = {
+  getUsers: getUsers,
 };

@@ -2,8 +2,7 @@ var path = require("path");
 var multer = require("multer");
 var fs = require("fs");
 var uploadDirectory = "./Images";
-
-var Storage = multer.diskStorage({
+var storage = multer.diskStorage({
   destination: function (req, file, callback) {
     if (!fs.existsSync(uploadDirectory)) {
       fs.mkdirSync(uploadDirectory);
@@ -26,6 +25,11 @@ var fileFilter = function (req, file, callback) {
   }
 };
 
+var upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
+
 var imageUpload = (req, res) => {
   try {
     if (
@@ -39,8 +43,7 @@ var imageUpload = (req, res) => {
   }
 };
 
-exports.ImageUpload = {
+exports.ImageUploadController = {
   imageUpload: imageUpload,
-  fileFilter: fileFilter,
-  storage: Storage,
+  upload: upload,
 };
