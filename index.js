@@ -7,6 +7,7 @@ var cors = require("cors");
 const { UserController } = require("./controllers/user");
 const { LoginController } = require("./controllers/login");
 const { ImageUploadController } = require("./controllers/imageUpload");
+const { QuestionController } = require("./controllers/questions");
 var app = express();
 app.use(cors());
 app.use(express.json());
@@ -42,6 +43,7 @@ app.post(
   ImageUploadController.upload.single("image"),
   ImageUploadController.imageUpload
 );
+app.post("/addQuestions", QuestionController.addQuestions);
 
 var server = app.listen(5000, function () {
   console.log("Server is running..");
