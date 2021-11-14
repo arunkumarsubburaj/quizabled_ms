@@ -7,7 +7,11 @@ var addQuestions = async function (req, res) {
     '${currentQuestion.questionImage}', 
     '${currentQuestion.languageCode}', 
     '${currentQuestion.category}', 
-    ${currentQuestion.isActive == "true" ? 1 : 0});`;
+    ${
+      currentQuestion.isActive == "true" || currentQuestion.isActive == true
+        ? 1
+        : 0
+    });`;
     try {
       const result = await sql.query(insertQuery);
       await getUpdatedId(req, res, qIndex);
@@ -44,8 +48,8 @@ function getOptionValues(options, questionId) {
     var queryString = `('${option.options}',
     '${option.optionImage}',
     '${questionId}',
-    '${option.isActive == "true" ? 1 : 0}', 
-    '${option.isAnswer == "true" ? 1 : 0}')`;
+    '${option.isActive == "true" || option.isActive == true ? 1 : 0}', 
+    '${option.isAnswer == "true" || option.isAnswer == true ? 1 : 0}')`;
     returnString += `${queryString}${isLastOption ? "" : ","}`;
   });
   return returnString;
