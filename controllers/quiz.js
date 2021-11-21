@@ -4,6 +4,8 @@ var getQuestions = async function (req, res) {
   quiz_questions.isActive = 1 
   and 
   quiz_questions.languageCode='en' 
+  and 
+  quiz_questions.quizType='${req.body.quizType}' 
   and
   quiz_questions.category='${req.body.category}'`;
   try {
@@ -51,6 +53,8 @@ var getRegionalQuestions = async function (req, res, primaryQuestionIds) {
     quiz_questions.isActive = 1 
     and 
     quiz_questions.languageCode='${req.body.language}' 
+    and 
+    quiz_questions.quizType='${req.body.quizType}' 
     and 
     quiz_questions.primaryQuestionId in (${primaryQuestionIds})`;
   try {
