@@ -22,7 +22,7 @@ var login = function (req, res) {
     ,q_category
     ,age
     ,isAttended
-  FROM user_profile where email='${req.body.email}' and password='${req.body.password}'`,
+  FROM user_profile where user_name='${req.body.user_name}' and password='${req.body.password}'`,
     function (err, recordset) {
       if (err) console.log(err);
       // send records as a response

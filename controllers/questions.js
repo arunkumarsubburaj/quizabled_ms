@@ -2,7 +2,14 @@ var sql = require("mssql");
 var addQuestions = async function (req, res) {
   for (var qIndex = 0; qIndex < req.body.length; qIndex++) {
     var currentQuestion = req.body[qIndex];
-    var insertQuery = `INSERT INTO quiz_questions (question, questionImage, languageCode, category, isActive) 
+    if (!!currentQuestion.category) {
+    } else {
+      res
+        .status(404)
+        .send("Something went wrong. Try resubmitting the data...");
+      return false;
+    }
+    var insertQuery = `INSERT INTO quiz_questions (question, questionImage, languageCode, category, isActive, primaryQuestionId, quizType) 
     VALUES ('${currentQuestion.question}', 
     '${currentQuestion.questionImage}', 
     '${currentQuestion.languageCode}', 
@@ -11,7 +18,9 @@ var addQuestions = async function (req, res) {
       currentQuestion.isActive == "true" || currentQuestion.isActive == true
         ? 1
         : 0
-    });`;
+    },
+    ${currentQuestion.primaryQuestionId},
+    ${currentQuestion.quizType});`;
     try {
       const result = await sql.query(insertQuery);
       await getUpdatedId(req, res, qIndex);
@@ -25,10 +34,21 @@ async function getUpdatedId(req, res, qIndex) {
   try {
     const result = await sql.query(lastModifiedId);
     var updatedQuestionId = result.recordset[0][""];
-    addOptions(req, res, updatedQuestionId, qIndex);
+    await addOptions(req, res, updatedQuestionId, qIndex);
+    await updateQuestionIdToOtherLang(req, res, updatedQuestionId);
   } catch (err) {
     res.status(500).send(err);
   }
+}
+function updateQuestionIdToOtherLang(req, res, updatedQuestionId) {
+  req.body.forEach((que, index) => {
+    if (
+      que.languageCode != "en" &&
+      (que.primaryQuestionId == null || que.primaryQuestionId == undefined)
+    ) {
+      que.primaryQuestionId = updatedQuestionId;
+    }
+  });
 }
 async function addOptions(req, res, updatedQuestionId, qIndex) {
   console.log(qIndex);
@@ -36,7 +56,7 @@ async function addOptions(req, res, updatedQuestionId, qIndex) {
 VALUES ${getOptionValues(req.body[qIndex].options, updatedQuestionId)};`;
   try {
     const result = await sql.query(insertOptions);
-    getAnswerOptionId(req, res, updatedQuestionId, qIndex);
+    await getAnswerOptionId(req, res, updatedQuestionId, qIndex);
   } catch (err) {
     res.status(500).send(err);
   }
@@ -47,9 +67,9 @@ function getOptionValues(options, questionId) {
     var isLastOption = options.length - 1 == index;
     var queryString = `('${option.options}',
     '${option.optionImage}',
-    '${questionId}',
-    '${option.isActive == "true" || option.isActive == true ? 1 : 0}', 
-    '${option.isAnswer == "true" || option.isAnswer == true ? 1 : 0}')`;
+    ${questionId},
+    ${option.isActive == "true" || option.isActive == true ? 1 : 0}, 
+    ${option.isAnswer == "true" || option.isAnswer == true ? 1 : 0})`;
     returnString += `${queryString}${isLastOption ? "" : ","}`;
   });
   return returnString;
@@ -59,7 +79,13 @@ async function getAnswerOptionId(req, res, updatedQuestionId, qIndex) {
   try {
     const result = await sql.query(query);
     var optionId = result.recordset[0].optionId;
-    updateOptionIdToQuestion(req, res, updatedQuestionId, optionId, qIndex);
+    await updateOptionIdToQuestion(
+      req,
+      res,
+      updatedQuestionId,
+      optionId,
+      qIndex
+    );
   } catch (err) {
     res.status(500).send(err);
   }
