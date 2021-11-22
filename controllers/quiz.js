@@ -11,6 +11,10 @@ var getQuestions = async function (req, res) {
   try {
     const result = await sql.query(getQuery);
     let questionIds = "";
+    if (result.recordset.length == 0) {
+      res.status(404).send("No Records Found");
+      return false;
+    }
     result.recordset.forEach((questionObj, index, resultArray) => {
       questionIds += questionObj.questionId;
       if (resultArray.length - 1 != index) {
@@ -18,34 +22,37 @@ var getQuestions = async function (req, res) {
       }
     });
     const primaryQuestions = result.recordset;
-    const regionalQuestions = await getRegionalQuestions(req, res, questionIds);
-    let regionalQuestionIds = "";
-    regionalQuestions.forEach((questionObj, index, resultArray) => {
-      regionalQuestionIds += questionObj.questionId;
-      if (resultArray.length - 1 != index) {
-        regionalQuestionIds += ",";
-      }
-    });
-
     const primaryOptions = await getPrimaryOptions(req, res, questionIds);
-    const regionalOptions = await getRegionalOptions(
-      req,
-      res,
-      regionalQuestionIds
-    );
+    let regionalQuestions;
+    let regionalOptions;
+    if (req.body.language != "en") {
+      regionalQuestions = await getRegionalQuestions(req, res, questionIds);
+      let regionalQuestionIds = "";
+      regionalQuestions.forEach((questionObj, index, resultArray) => {
+        regionalQuestionIds += questionObj.questionId;
+        if (resultArray.length - 1 != index) {
+          regionalQuestionIds += ",";
+        }
+      });
+
+      regionalOptions = await getRegionalOptions(req, res, regionalQuestionIds);
+    }
     const questionsSet = {
       primaryQuestionsObj: {
         questions: primaryQuestions,
         options: primaryOptions,
       },
-      secondaryQuestionObj: {
-        questions: regionalQuestions,
-        options: regionalOptions,
-      },
+      secondaryQuestionsObj:
+        req.body.language != "en"
+          ? {
+              questions: regionalQuestions,
+              options: regionalOptions,
+            }
+          : null,
     };
     res.status(200).send(questionsSet);
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 };
 var getRegionalQuestions = async function (req, res, primaryQuestionIds) {
@@ -61,7 +68,7 @@ var getRegionalQuestions = async function (req, res, primaryQuestionIds) {
     const result = await sql.query(getSecondaryQuestionsQuery);
     return result.recordset;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 };
 var getPrimaryOptions = async function (req, res, primaryQuestionIds) {
@@ -73,7 +80,7 @@ var getPrimaryOptions = async function (req, res, primaryQuestionIds) {
     const result = await sql.query(getOptionsQuery);
     return result.recordset;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 };
 var getRegionalOptions = async function (req, res, reqionalQuestionIds) {
@@ -85,9 +92,23 @@ var getRegionalOptions = async function (req, res, reqionalQuestionIds) {
     const result = await sql.query(getOptionsQuery);
     return result.recordset;
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
+  }
+};
+var getAnswers = async function (req, res) {
+  const answerQuery = `select quiz_questions.optionId, quiz_questions.questionId from quiz_questions 
+    where quiz_questions.quizType=${req.body.quizType} and 
+    quiz_questions.languageCode='en' and
+    quiz_questions.isActive = 1 and 
+    quiz_questions.category='${req.body.category}'`;
+  try {
+    const result = await sql.query(answerQuery);
+    res.status(200).send(result.recordset);
+  } catch (err) {
+    res.status(500).send(err.message);
   }
 };
 exports.QuizController = {
   getQuestions: getQuestions,
+  getAnswers: getAnswers,
 };

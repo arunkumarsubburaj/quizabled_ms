@@ -2,10 +2,10 @@ var path = require("path");
 var multer = require("multer");
 var fs = require("fs");
 var uploadDirectory = "./Images";
-var isImageFile = () => {
+var isImageFile = (file) => {
   return (
-    path.extname(req.file.originalname).toLowerCase() === ".png" ||
-    path.extname(req.file.originalname).toLowerCase() === ".jpg"
+    path.extname(file.originalname).toLowerCase() === ".png" ||
+    path.extname(file.originalname).toLowerCase() === ".jpg"
   );
 };
 var storage = multer.diskStorage({
@@ -20,7 +20,7 @@ var storage = multer.diskStorage({
   },
 });
 var fileFilter = function (req, file, callback) {
-  if (isImageFile()) {
+  if (isImageFile(file)) {
     console.log(file);
     callback(null, true);
   } else {
@@ -35,7 +35,7 @@ var upload = multer({
 
 var imageUpload = (req, res) => {
   try {
-    if (isImageFile()) {
+    if (isImageFile(req.file)) {
       res.status(200).send(req.file);
     }
   } catch (err) {

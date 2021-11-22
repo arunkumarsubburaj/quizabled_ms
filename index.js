@@ -45,7 +45,8 @@ app.post(
   ImageUploadController.imageUpload
 );
 app.post("/addQuestions", QuestionController.addQuestions);
-app.get("/getQuestions", QuizController.getQuestions);
+app.post("/getQuestions", QuizController.getQuestions);
+app.post("/getAnswers", QuizController.getAnswers);
 
 var server = app.listen(5000, function () {
   console.log("Server is running..");
