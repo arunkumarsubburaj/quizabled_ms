@@ -17,10 +17,21 @@ app.use(cookieParser());
 app.use(session({ secret: "Quizabled" }));
 
 // config for your database
+// var config = {
+//   user: "arun123sa",
+//   password: "Apple@123",
+//   server: "localhost",
+//   database: "quizabled",
+//   options: {
+//     trustedConnection: true,
+//   },
+//   trustServerCertificate: true,
+// };
+
 var config = {
-  user: "arun123sa",
-  password: "Apple@123",
-  server: "localhost",
+  user: "developer",
+  password: "quizabled@#$2021",
+  server: "3.110.98.117",
   database: "quizabled",
   options: {
     trustedConnection: true,
@@ -28,25 +39,39 @@ var config = {
   trustServerCertificate: true,
 };
 
-// connect to your database
-sql.connect(config, function (err) {
-  if (err) console.log(err);
-  else {
-    console.log("connected!!!");
+(async function () {
+  try {
+    await sql.connect(config);
+    console.log("DB connected");
+    app.get("/quizabled_node/quizabled_ms/api/users", UserController.getUsers);
+    app.post("/quizabled_node/quizabled_ms/api/login", LoginController.login);
+    app.get("/quizabled_node/quizabled_ms/api/logout", LoginController.logout);
+    app.post(
+      "/quizabled_node/quizabled_ms/api/upload",
+      ImageUploadController.upload.single("image"),
+      ImageUploadController.imageUpload
+    );
+    app.post(
+      "/quizabled_node/quizabled_ms/api/addQuestions",
+      QuestionController.addQuestions
+    );
+    app.post(
+      "/quizabled_node/quizabled_ms/api/getQuestions",
+      QuizController.getQuestions
+    );
+    app.post(
+      "/quizabled_node/quizabled_ms/api/getAnswers",
+      QuizController.getAnswers
+    );
+  } catch (error) {
+    console.log(error);
   }
-});
+})();
 
-app.get("/users", UserController.getUsers);
-app.post("/login", LoginController.login);
-app.get("/logout", LoginController.logout);
-app.post(
-  "/upload",
-  ImageUploadController.upload.single("image"),
-  ImageUploadController.imageUpload
-);
-app.post("/addQuestions", QuestionController.addQuestions);
-app.post("/getQuestions", QuizController.getQuestions);
-app.post("/getAnswers", QuizController.getAnswers);
+// connect to your database
+// var server = app.listen(process.env.PORT, function () {
+// console.log("Server is running..");
+// });
 
 var server = app.listen(5000, function () {
   console.log("Server is running..");

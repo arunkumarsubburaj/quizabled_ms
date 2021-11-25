@@ -97,7 +97,6 @@ async function updateOptionIdToQuestion(
   optionId,
   qIndex
 ) {
-  var request = new sql.Request();
   var query = `UPDATE quiz_questions SET optionId = ${optionId} WHERE quiz_questions.questionId = ${questionId};`;
   try {
     const result = await sql.query(query);
@@ -109,6 +108,37 @@ async function updateOptionIdToQuestion(
     res.status(500).send(err);
   }
 }
+var getAllQuestions = async function (req, res) {
+  var questionQuery = `select questionId, question, questionImage, category, isActive, quizType 
+  from quiz_questions 
+  where quiz_questions.languageCode='en'`;
+  try {
+    const questionResult = await sql.query(questionQuery);
+    const questionArray = questionResult.recordset;
+    let questionIds = "";
+    questionArray.forEach((questionObj, index, qArray) => {
+      questionIds += questionObj.questionId;
+      if (index != qArray.length - 1) {
+        questionIds += ",";
+      }
+    });
+    const optionArray = await getOptions(questionIds);
+    res.status(200).send({ questionArray, optionArray });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+async function getOptions(questionIds) {
+  var optionQuery = `select options, optionImage,questionId, isActive, isAnswer 
+  from quiz_options where questionId in (${questionIds})`;
+  try {
+    const optionResult = await sql.query(optionQuery);
+    return optionResult.recordset;
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+}
 exports.QuestionController = {
   addQuestions: addQuestions,
+  getAllQuestions: getAllQuestions,
 };
