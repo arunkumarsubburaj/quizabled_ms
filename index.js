@@ -17,27 +17,27 @@ app.use(cookieParser());
 app.use(session({ secret: "Quizabled" }));
 
 // config for your database
-// var config = {
-//   user: "arun123sa",
-//   password: "Apple@123",
-//   server: "localhost",
-//   database: "quizabled",
-//   options: {
-//     trustedConnection: true,
-//   },
-//   trustServerCertificate: true,
-// };
-
 var config = {
-  user: "developer",
-  password: "quizabled@#$2021",
-  server: "3.110.98.117",
+  user: "arun123sa",
+  password: "Apple@123",
+  server: "localhost",
   database: "quizabled",
   options: {
     trustedConnection: true,
   },
   trustServerCertificate: true,
 };
+
+// var config = {
+//   user: "developer",
+//   password: "quizabled@#$2021",
+//   server: "3.110.98.117",
+//   database: "quizabled",
+//   options: {
+//     trustedConnection: true,
+//   },
+//   trustServerCertificate: true,
+// };
 
 (async function () {
   try {
@@ -62,6 +62,22 @@ var config = {
     app.post(
       "/quizabled_node/quizabled_ms/api/getAnswers",
       QuizController.getAnswers
+    );
+    app.get(
+      "/quizabled_node/quizabled_ms/api/getAllQuestions",
+      QuestionController.getAllQuestions
+    );
+    app.get(
+      "/quizabled_node/quizabled_ms/api/getQuestion",
+      QuestionController.getQuestion
+    );
+    app.put(
+      "/quizabled_node/quizabled_ms/api/editQuestion",
+      QuestionController.editQuestion
+    );
+    app.delete(
+      "/quizabled_node/quizabled_ms/api/deleteQuestion",
+      QuestionController.deleteQuestion
     );
   } catch (error) {
     console.log(error);

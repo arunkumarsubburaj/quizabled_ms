@@ -1,12 +1,8 @@
-var path = require("path");
 var multer = require("multer");
 var fs = require("fs");
 var uploadDirectory = "./Images";
 var isImageFile = (file) => {
-  return (
-    path.extname(file.originalname).toLowerCase() === ".png" ||
-    path.extname(file.originalname).toLowerCase() === ".jpg"
-  );
+  return file.fieldname.toLowerCase() == "image";
 };
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {

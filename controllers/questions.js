@@ -25,7 +25,7 @@ var addQuestions = async function (req, res) {
       const result = await sql.query(insertQuery);
       await getUpdatedId(req, res, qIndex);
     } catch (err) {
-      res.status(500).send(err);
+      res.status(500).send(err.message);
     }
   }
 };
@@ -37,7 +37,7 @@ async function getUpdatedId(req, res, qIndex) {
     await addOptions(req, res, updatedQuestionId, qIndex);
     await updateQuestionIdToOtherLang(req, res, updatedQuestionId);
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 }
 function updateQuestionIdToOtherLang(req, res, updatedQuestionId) {
@@ -58,7 +58,7 @@ VALUES ${getOptionValues(req.body[qIndex].options, updatedQuestionId)};`;
     const result = await sql.query(insertOptions);
     await getAnswerOptionId(req, res, updatedQuestionId, qIndex);
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 }
 function getOptionValues(options, questionId) {
@@ -87,7 +87,7 @@ async function getAnswerOptionId(req, res, updatedQuestionId, qIndex) {
       qIndex
     );
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 }
 async function updateOptionIdToQuestion(
@@ -105,31 +105,38 @@ async function updateOptionIdToQuestion(
       res.status(200).send(result);
     }
   } catch (err) {
-    res.status(500).send(err);
+    res.status(500).send(err.message);
   }
 }
 var getAllQuestions = async function (req, res) {
   var questionQuery = `select questionId, question, questionImage, category, isActive, quizType 
   from quiz_questions 
-  where quiz_questions.languageCode='en'`;
+  where quiz_questions.languageCode='en' 
+  and quiz_questions.category='${req.query.category}' 
+  and  quiz_questions.quizType=${req.query.quizType}
+  and  quiz_questions.isActive=${req.query.isActive}`;
   try {
     const questionResult = await sql.query(questionQuery);
     const questionArray = questionResult.recordset;
-    let questionIds = "";
-    questionArray.forEach((questionObj, index, qArray) => {
-      questionIds += questionObj.questionId;
-      if (index != qArray.length - 1) {
-        questionIds += ",";
-      }
-    });
-    const optionArray = await getOptions(questionIds);
-    res.status(200).send({ questionArray, optionArray });
+    if (questionArray.length == 0) {
+      res.send(404).status({ message: "No Records Found" });
+    } else {
+      let questionIds = "";
+      questionArray.forEach((questionObj, index, qArray) => {
+        questionIds += questionObj.questionId;
+        if (index != qArray.length - 1) {
+          questionIds += ",";
+        }
+      });
+      const optionArray = await getOptions(req, res, questionIds);
+      res.status(200).send({ questionArray, optionArray });
+    }
   } catch (error) {
     res.status(500).send(error.message);
   }
 };
-async function getOptions(questionIds) {
-  var optionQuery = `select options, optionImage,questionId, isActive, isAnswer 
+async function getOptions(req, res, questionIds) {
+  var optionQuery = `select options, optionImage,questionId, isActive, isAnswer, optionId 
   from quiz_options where questionId in (${questionIds})`;
   try {
     const optionResult = await sql.query(optionQuery);
@@ -138,7 +145,116 @@ async function getOptions(questionIds) {
     res.status(500).send(error.message);
   }
 }
+var getQuestion = async function (req, res) {
+  var qnArrayQuery = `select * from quiz_questions 
+  where (quiz_questions.questionId=${req.query.questionId} 
+    or quiz_questions.primaryQuestionId=${req.query.questionId})`;
+  try {
+    var result = await sql.query(qnArrayQuery);
+    var questionArray = result.recordset;
+    if (questionArray.length == 0) {
+      res.status(404).send("No Records Found...");
+    } else {
+      let questionIds = "";
+      questionArray.forEach((questionObj, index, qArray) => {
+        questionIds += questionObj.questionId;
+        if (index != qArray.length - 1) {
+          questionIds += ",";
+        }
+      });
+      const optionArray = await getOptions(req, res, questionIds);
+      res.status(200).send({ questionArray, optionArray });
+    }
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+var editQuestion = async function (req, res) {
+  for (var qIndex = 0; qIndex < req.body.length; qIndex++) {
+    var currentQuestion = req.body[qIndex];
+    if (!!currentQuestion.category) {
+    } else {
+      res
+        .status(404)
+        .send("Something went wrong. Try resubmitting the data...");
+      return false;
+    }
+    var updateQuery = `update quiz_questions set question='${currentQuestion.question}',
+    questionImage='${currentQuestion.questionImage}',
+    category='${currentQuestion.category}' where questionId=${currentQuestion.questionId};`;
+    try {
+      const result = await sql.query(updateQuery);
+      await updateOptions(req, res, qIndex, currentQuestion.questionId);
+      if (qIndex == req.body.length - 1) {
+        res.status(200).send({ message: "Question Updated Successfully!" });
+      }
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  }
+};
+async function updateOptions(req, res, qIndex, questionId) {
+  var optionArray = req.body[qIndex].options;
+  optionArray.forEach(async (optionObj) => {
+    const updateOptionQuery = `update quiz_options set options='${
+      optionObj.options
+    }',
+    optionImage='${optionObj.optionImage}',
+    isAnswer=${
+      optionObj.isAnswer == "true" || optionObj.isAnswer == true ? 1 : 0
+    } where optionId=${optionObj.optionId}`;
+    try {
+      await sql.query(updateOptionQuery);
+      if (optionObj.isAnswer == "true" || optionObj.isAnswer == true) {
+        await changeOptionIdOnQuestion(req, res, optionObj, qIndex);
+      }
+    } catch (err) {
+      res.status(500).send(err.message);
+    }
+  });
+}
+async function changeOptionIdOnQuestion(req, res, optionObj, qIndex) {
+  const answerOptionId = optionObj.optionId;
+  const Ans_Id_To_Que_Query = `update quiz_questions set optionId=${answerOptionId} 
+    where questionId=${req.body[qIndex].questionId}`;
+  try {
+    await sql.query(Ans_Id_To_Que_Query);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+}
+var deleteQuestion = async function (req, res) {
+  var questionQuery = `update quiz_questions set isActive = 0 
+  where quiz_questions.questionId=${req.query.questionId} 
+  or 
+  quiz_questions.primaryQuestionId=${req.query.questionId}`;
+  var optionQuery = `update quiz_options set isActive = 0 
+  where quiz_options.questionId=${req.query.questionId}`;
+  try {
+    await sql.query(questionQuery);
+    await sql.query(optionQuery);
+    var secondaryQuestionArray = `select questionId from quiz_questions where primaryQuestionId=${req.query.questionId}`;
+    var secondaryArrayResult = await sql.query(secondaryQuestionArray);
+    var secondaryQuestionArray = secondaryArrayResult.recordset;
+    var secQueString = "";
+    secondaryQuestionArray.forEach((secQueId, index, qArray) => {
+      secQueString += secQueId.questionId;
+      if (index != qArray.length - 1) {
+        secQueString += ",";
+      }
+    });
+    var secOptionQuery = `update quiz_options set isActive = 0 
+    where quiz_options.questionId in (${secQueString})`;
+    await sql.query(secOptionQuery);
+    res.status(200).send({ message: "Question Deleted!!!" });
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
 exports.QuestionController = {
   addQuestions: addQuestions,
   getAllQuestions: getAllQuestions,
+  getQuestion: getQuestion,
+  editQuestion: editQuestion,
+  deleteQuestion: deleteQuestion,
 };

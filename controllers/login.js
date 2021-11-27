@@ -43,14 +43,14 @@ var login = function (req, res) {
           expiresIn: expiresIn,
         });
       } else {
-        res.status(404).send({ code: 404, message: "Login Failed!!!" });
+        res.status(404).send({ message: "Login Failed!!!" });
       }
     }
   );
 };
 var logout = function (req, res) {
   req.session.destroy(function () {
-    res.status(200).send("user logged out.");
+    res.status(200).send({ message: "user logged out." });
   });
 };
 exports.LoginController = {
