@@ -10,7 +10,7 @@ var addQuestions = async function (req, res) {
       return false;
     }
     var insertQuery = `INSERT INTO quiz_questions (question, questionImage, languageCode, category, isActive, primaryQuestionId, quizType) 
-    VALUES ('${currentQuestion.question}', 
+    VALUES (N'${currentQuestion.question}', 
     '${currentQuestion.questionImage}', 
     '${currentQuestion.languageCode}', 
     '${currentQuestion.category}', 
@@ -65,7 +65,7 @@ function getOptionValues(options, questionId) {
   var returnString = "";
   options.forEach((option, index, options) => {
     var isLastOption = options.length - 1 == index;
-    var queryString = `('${option.options}',
+    var queryString = `(N'${option.options}',
     '${option.optionImage}',
     ${questionId},
     ${option.isActive == "true" || option.isActive == true ? 1 : 0}, 
@@ -153,7 +153,7 @@ var getQuestion = async function (req, res) {
     var result = await sql.query(qnArrayQuery);
     var questionArray = result.recordset;
     if (questionArray.length == 0) {
-      res.status(404).send("No Records Found...");
+      res.status(404).end("No Records Found...");
     } else {
       let questionIds = "";
       questionArray.forEach((questionObj, index, qArray) => {
@@ -179,7 +179,7 @@ var editQuestion = async function (req, res) {
         .send("Something went wrong. Try resubmitting the data...");
       return false;
     }
-    var updateQuery = `update quiz_questions set question='${currentQuestion.question}',
+    var updateQuery = `update quiz_questions set question=N'${currentQuestion.question}',
     questionImage='${currentQuestion.questionImage}',
     category='${currentQuestion.category}' where questionId=${currentQuestion.questionId};`;
     try {
@@ -196,7 +196,7 @@ var editQuestion = async function (req, res) {
 async function updateOptions(req, res, qIndex, questionId) {
   var optionArray = req.body[qIndex].options;
   optionArray.forEach(async (optionObj) => {
-    const updateOptionQuery = `update quiz_options set options='${
+    const updateOptionQuery = `update quiz_options set options=N'${
       optionObj.options
     }',
     optionImage='${optionObj.optionImage}',

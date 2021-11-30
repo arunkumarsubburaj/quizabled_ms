@@ -43,7 +43,7 @@ var login = function (req, res) {
           expiresIn: expiresIn,
         });
       } else {
-        res.status(404).send({ message: "Login Failed!!!" });
+        res.status(404).end("Login Failed!!!");
       }
     }
   );

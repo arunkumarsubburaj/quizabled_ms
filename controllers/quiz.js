@@ -12,7 +12,7 @@ var getQuestions = async function (req, res) {
     const result = await sql.query(getQuery);
     let questionIds = "";
     if (result.recordset.length == 0) {
-      res.status(404).send("No Records Found");
+      res.status(404).end("No Records Found");
       return false;
     }
     result.recordset.forEach((questionObj, index, resultArray) => {
