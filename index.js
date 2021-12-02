@@ -9,35 +9,38 @@ const { LoginController } = require("./controllers/login");
 const { ImageUploadController } = require("./controllers/imageUpload");
 const { QuestionController } = require("./controllers/questions");
 const { QuizController } = require("./controllers/quiz");
+const { FileUploadController } = require("./controllers/resource");
+
 var app = express();
-app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded());
+app.use(cors());
 app.use(cookieParser());
 app.use(session({ secret: "Quizabled" }));
 
 // config for your database
-var config = {
-  user: "arun123sa",
-  password: "Apple@123",
-  server: "localhost",
-  database: "quizabled",
-  options: {
-    trustedConnection: true,
-  },
-  trustServerCertificate: true,
-};
 
 // var config = {
-//   user: "developer",
-//   password: "quizabled@#$2021",
-//   server: "3.110.98.117",
+//   user: "arun123sa",
+//   password: "Apple@123",
+//   server: "localhost",
 //   database: "quizabled",
 //   options: {
 //     trustedConnection: true,
 //   },
 //   trustServerCertificate: true,
 // };
+
+var config = {
+  user: "developer",
+  password: "quizabled@#$2021",
+  server: "3.110.98.117",
+  database: "quizabled",
+  options: {
+    trustedConnection: true,
+  },
+  trustServerCertificate: true,
+};
 
 (async function () {
   try {
@@ -83,6 +86,20 @@ var config = {
     console.log(error);
   }
 })();
+
+app.get(
+  "/quizabled_node/quizabled_ms/api/getFileNames",
+  FileUploadController.getListFiles
+);
+app.post(
+  "/quizabled_node/quizabled_ms/api/uploadFile",
+  FileUploadController.upload.single("resource"),
+  FileUploadController.fileUpload
+);
+app.get(
+  "/quizabled_node/quizabled_ms/api/download",
+  FileUploadController.download
+);
 
 // connect to your database
 // var server = app.listen(process.env.PORT, function () {
