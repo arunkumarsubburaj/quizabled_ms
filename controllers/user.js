@@ -12,7 +12,17 @@ getUsers = function (req, res) {
       .send({ data: users, message: "User Data Fetched Successfully" });
   });
 };
+getUser = async function (req, res) {
+  const query = `select id, 
+  name, 
+  user_name from user_profile where user_profile.id=${req.query.id}`;
+  try {
+    const result = await sql.query(query);
+    res.status(200).send(result.recordset[0]);
+  } catch (error) {}
+};
 
 exports.UserController = {
   getUsers: getUsers,
+  getUser: getUser,
 };

@@ -10,6 +10,7 @@ const { ImageUploadController } = require("./controllers/imageUpload");
 const { QuestionController } = require("./controllers/questions");
 const { QuizController } = require("./controllers/quiz");
 const { FileUploadController } = require("./controllers/resource");
+const { StudentController } = require("./controllers/student");
 
 var app = express();
 app.use(express.json());
@@ -82,6 +83,27 @@ var config = {
       "/quizabled_node/quizabled_ms/api/deleteQuestion",
       QuestionController.deleteQuestion
     );
+    app.get(
+      "/quizabled_node/quizabled_ms/api/getStudents",
+      StudentController.getStudents
+    );
+    app.post(
+      "/quizabled_node/quizabled_ms/api/updateQuizStatus",
+      StudentController.updateQuizStatus
+    );
+    app.post(
+      "/quizabled_node/quizabled_ms/api/addStudentLog",
+      StudentController.addStudentLog
+    );
+    app.get(
+      "/quizabled_node/quizabled_ms/api/getStudentLog",
+      StudentController.getStudentLog
+    );
+    app.get(
+      "/quizabled_node/quizabled_ms/api/unlockStudent",
+      StudentController.unlockStudent
+    );
+    app.get("/quizabled_node/quizabled_ms/api/getUser", UserController.getUser);
   } catch (error) {
     console.log(error);
   }

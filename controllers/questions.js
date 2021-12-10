@@ -10,7 +10,7 @@ var addQuestions = async function (req, res) {
       return false;
     }
     var insertQuery = `INSERT INTO quiz_questions (question, questionImage, languageCode, category, isActive, primaryQuestionId, quizType) 
-    VALUES (N'${currentQuestion.question}', 
+    VALUES (N'${currentQuestion.question.replace(/'/g, "''")}', 
     '${currentQuestion.questionImage}', 
     '${currentQuestion.languageCode}', 
     '${currentQuestion.category}', 
@@ -65,7 +65,7 @@ function getOptionValues(options, questionId) {
   var returnString = "";
   options.forEach((option, index, options) => {
     var isLastOption = options.length - 1 == index;
-    var queryString = `(N'${option.options}',
+    var queryString = `(N'${option.options.replace(/'/g, "''")}',
     '${option.optionImage}',
     ${questionId},
     ${option.isActive == "true" || option.isActive == true ? 1 : 0}, 
@@ -179,9 +179,14 @@ var editQuestion = async function (req, res) {
         .send("Something went wrong. Try resubmitting the data...");
       return false;
     }
-    var updateQuery = `update quiz_questions set question=N'${currentQuestion.question}',
+    var updateQuery = `update quiz_questions set question=N'${currentQuestion.question.replace(
+      /'/g,
+      "''"
+    )}',
     questionImage='${currentQuestion.questionImage}',
-    category='${currentQuestion.category}' where questionId=${currentQuestion.questionId};`;
+    category='${currentQuestion.category}' where questionId=${
+      currentQuestion.questionId
+    };`;
     try {
       const result = await sql.query(updateQuery);
       await updateOptions(req, res, qIndex, currentQuestion.questionId);
@@ -196,9 +201,10 @@ var editQuestion = async function (req, res) {
 async function updateOptions(req, res, qIndex, questionId) {
   var optionArray = req.body[qIndex].options;
   optionArray.forEach(async (optionObj) => {
-    const updateOptionQuery = `update quiz_options set options=N'${
-      optionObj.options
-    }',
+    const updateOptionQuery = `update quiz_options set options=N'${optionObj.options.replace(
+      /'/g,
+      "''"
+    )}',
     optionImage='${optionObj.optionImage}',
     isAnswer=${
       optionObj.isAnswer == "true" || optionObj.isAnswer == true ? 1 : 0

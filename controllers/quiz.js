@@ -1,13 +1,22 @@
 var sql = require("mssql");
 var getQuestions = async function (req, res) {
-  const getQuery = `select * from quiz_questions where 
+  const getQuery = `SELECT TOP 20 * from quiz_questions where 
   quiz_questions.isActive = 1 
   and 
   quiz_questions.languageCode='en' 
   and 
   quiz_questions.quizType='${req.body.quizType}' 
   and
-  quiz_questions.category='${req.body.category}'`;
+  quiz_questions.category='${req.body.category}'
+  ORDER BY NEWID()`;
+  // const getQuery = `select * from quiz_questions where
+  // quiz_questions.isActive = 1
+  // and
+  // quiz_questions.languageCode='en'
+  // and
+  // quiz_questions.quizType='${req.body.quizType}'
+  // and
+  // quiz_questions.category='${req.body.category}'`;
   try {
     const result = await sql.query(getQuery);
     let questionIds = "";
