@@ -104,6 +104,7 @@ var config = {
       StudentController.unlockStudent
     );
     app.get("/quizabled_node/quizabled_ms/api/getUser", UserController.getUser);
+    app.post("/addUsers", UserController.postDetails);
   } catch (error) {
     console.log(error);
   }
