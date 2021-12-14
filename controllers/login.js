@@ -4,6 +4,7 @@ var jwt = require("jsonwebtoken");
 var fs = require("fs");
 
 const RSA_PRIVATE_KEY = fs.readFileSync("private.key");
+
 var login = function (req, res) {
   console.log(req.body);
   // console.log(users);
@@ -22,6 +23,8 @@ var login = function (req, res) {
     ,q_category
     ,age
     ,isAttended
+    ,startTime
+    ,endTime
   FROM user_profile where user_name='${req.body.user_name}' and password='${req.body.password}'`,
     function (err, recordset) {
       if (err) console.log(err);
@@ -53,7 +56,17 @@ var logout = function (req, res) {
     res.status(200).send({ message: "user logged out." });
   });
 };
+var statusFlag = async function (req, res) {
+  var flagQuery = `select * from flags`;
+  try {
+    var result = await sql.query(flagQuery);
+    res.status(200).send(result.recordset[0]);
+  } catch (error) {
+    res.status(500).send("Something Went wrong");
+  }
+};
 exports.LoginController = {
   login: login,
   logout: logout,
+  statusFlag: statusFlag,
 };

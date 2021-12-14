@@ -13,7 +13,8 @@ var getStudents = async function (req, res) {
   age,
   isAttended,
   startTime,
-  endTime 
+  endTime,
+  totalMarks 
   from 
   user_profile where user_profile.role='STUDENT'`;
   try {
@@ -61,6 +62,16 @@ VALUES ${getAnswerValues(req.body.answerObj, req.query.studentId)}`;
     res.status(500).send(err);
   }
 };
+var updateStudentMark = async function (req, res) {
+  var updateLogs = `update user_profile set totalMarks=${req.body.totalMark} 
+  where id=${req.body.studentId}`;
+  try {
+    const result = await sql.query(updateLogs);
+    res.status(200).send(result.recordset);
+  } catch (err) {
+    res.status(500).send(err);
+  }
+};
 var deleteStudentLog = async function (req, res) {
   const deleteLogQuery = `delete from student_log where studentId = ${req.query.studentId}`;
   try {
@@ -97,7 +108,7 @@ var getStudentLog = async function (req, res) {
     const result = await sql.query(selectQuery);
     res.status(200).send(result.recordset);
   } catch (error) {
-    res.status(500).send(err);
+    res.status(500).send(error);
   }
 };
 var unlockStudent = async function (req, res) {
@@ -119,4 +130,5 @@ exports.StudentController = {
   addStudentLog: addStudentLog,
   getStudentLog: getStudentLog,
   unlockStudent: unlockStudent,
+  updateStudentMark: updateStudentMark,
 };

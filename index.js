@@ -11,6 +11,7 @@ const { QuestionController } = require("./controllers/questions");
 const { QuizController } = require("./controllers/quiz");
 const { FileUploadController } = require("./controllers/resource");
 const { StudentController } = require("./controllers/student");
+// const { MarksController } = require("./controllers/getMarks");
 
 var app = express();
 app.use(express.json());
@@ -105,6 +106,18 @@ var config = {
     );
     app.get("/quizabled_node/quizabled_ms/api/getUser", UserController.getUser);
     app.post("/addUsers", UserController.postDetails);
+    app.get(
+      "/quizabled_node/quizabled_ms/api/flags",
+      LoginController.statusFlag
+    );
+    // app.get(
+    //   "/quizabled_node/quizabled_ms/api/calculateMarks",
+    //   MarksController.calculateMarks
+    // );
+    app.post(
+      "/quizabled_node/quizabled_ms/api/updateStudentMark",
+      StudentController.updateStudentMark
+    );
   } catch (error) {
     console.log(error);
   }
