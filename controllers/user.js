@@ -51,14 +51,14 @@ function getAnswerValues(userArray) {
       N'${user.Name ? user.Name.replace(/'/g, "''") : null}',
         '${user.UserName}',
         '${user.Password}',
-        '${user.DOB}',
-        N'${user.Institution.replace(/'/g, "''")}',
+        '${user.DOB ? user.DOB : null}',
+        N'${user.Institution ? user.Institution.replace(/'/g, "''") : null}',
         'STUDENT',
-        N'${user.Email.replace(/'/g, "''")}',
-        N'${user.City.replace(/'/g, "''")}',
-        '${user.Phone}',
+        N'${user.Email ? user.Email.replace(/'/g, "''") : null}',
+        N'${user.City ? user.City.replace(/'/g, "''") : null}',
+        '${user.Phone ? user.Phone : null}',
         '${user.QuizCategory}',
-        '${user.Age}',
+        '${user.Age ? user.Age : null}',
         '0'
         )`;
     returnString += `${queryString}${isLastOption ? "" : ","}`;
